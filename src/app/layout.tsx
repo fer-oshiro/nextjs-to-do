@@ -31,7 +31,7 @@ export default function RootLayout({
         <TRPCReactProvider>
           <main className="mx-auto w-full max-w-2xl px-4 py-10">{children}</main>
         </TRPCReactProvider>
-        <Toaster theme="light" richColors closeButton />
+        <Toaster closeButton />
       </body>
     </html>
   );
