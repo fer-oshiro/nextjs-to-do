@@ -33,3 +33,10 @@ export type Task = {
   dataCriacao: Date;
   dataAtualizacao?: Date;
 };
+
+/**
+ * Input da listagem usado tanto no prefetch do servidor quanto no hook do
+ * cliente. Precisa ser idêntico nos dois lados para gerar a mesma query key,
+ * senão o cliente ignoraria os dados vindos do SSR e buscaria tudo de novo.
+ */
+export const taskListInput = { limit: 10 };
