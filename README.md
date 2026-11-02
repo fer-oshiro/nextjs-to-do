@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tarefas: Next.js 15 + tRPC
 
-## Getting Started
+Aplicação simples de gerenciamento de tarefas. O backend guarda as tarefas **em memória** e as expõe via **tRPC**. O frontend lista as tarefas com **SSR** e **infinite scroll**, e permite criar, editar e excluir com validação e feedback visual.
 
-First, run the development server:
+**Demo:** _em breve_
+
+## Funcionalidades
+
+- **Listagem com SSR**: o HTML já chega do servidor com a primeira página de tarefas.
+- **Infinite scroll**: as próximas páginas carregam conforme a rolagem (paginação por cursor).
+- **Excluir na listagem**: dialog de confirmação e toast de sucesso ou erro.
+- **Criar e editar**: um único formulário, com o título obrigatório validado no cliente e no servidor.
+- **Estados de UI**: skeletons durante o carregamento, botões desabilitados com spinner durante as ações, estado vazio, página de erro com "Tentar novamente" e 404 para tarefa inexistente.
+
+## Como rodar
+
+Requisitos: Node.js 20+.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run prepare   # ativa os git hooks (ver "Segurança do npm" abaixo)
+npm run dev       # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Outros scripts: `npm run build`, `npm start`, `npm run lint`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Não há variáveis de ambiente nem segredos. Ao iniciar, o servidor cria ~25 tarefas fictícias.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Stack
 
-## Learn More
+| Necessidade | Escolha | Por quê |
+|---|---|---|
+| Framework | Next.js 15 (App Router) | Server Components para o SSR; route handler para a API |
+| API | tRPC v11 | Tipagem ponta a ponta sem gerar código nem escrever contratos |
+| Cache / estado do servidor | TanStack Query (via `@trpc/tanstack-react-query`) | Hidratação do SSR, infinite query, invalidação após mutations |
+| Validação | zod | O **mesmo schema** valida o input do tRPC e o formulário |
+| Serialização | superjson | `dataCriacao` chega no cliente como `Date`, não como string |
+| Formulário | react-hook-form + `@hookform/resolvers/zod` | Estado do form com hooks e validação pelo schema |
+| UI | shadcn/ui + Tailwind CSS | Componentes acessíveis prontos (dialog, toast, skeleton…) |
+| Infinite scroll | `react-intersection-observer` | Detecta quando o fim da lista entra na tela |
 
-To learn more about Next.js, take a look at the following resources:
+## Arquitetura
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+  lib/schemas/task.ts         # schemas zod + tipo Task (compartilhados entre front e back)
+  server/
+    db.ts                     # "banco" em memória (Map) + seed
+    trpc.ts                   # initTRPC, superjson e formatação dos erros de validação
+    routers/task.ts           # list, byId, create, update, delete
+    routers/_app.ts           # appRouter e o tipo AppRouter
+  app/
+    api/trpc/[trpc]/route.ts  # endpoint HTTP do tRPC
+    page.tsx                  # listagem (SSR)
+    tasks/new/page.tsx        # criar
+    tasks/[id]/edit/page.tsx  # editar (SSR, 404 se não existir)
+    loading.tsx, error.tsx, not-found.tsx
+  trpc/
+    client.tsx                # provider do React Query + tRPC (navegador)
+    server.tsx                # proxy do tRPC para Server Components (sem HTTP)
+    query-client.ts           # configuração compartilhada do QueryClient
+  components/                 # task-list, task-card, task-form, delete-task-button, ui/ (shadcn)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Fluxo do SSR
 
-## Deploy on Vercel
+1. `app/page.tsx` (Server Component) chama `prefetchInfiniteQuery` usando o proxy de `trpc/server.tsx`. O proxy executa o router **direto no processo**, sem requisição HTTP.
+2. O resultado vai para o `QueryClient` da requisição, que é serializado com superjson pelo `<HydrateClient>`.
+3. No navegador, `useSuspenseInfiniteQuery` encontra os dados já em cache (mesma query key) e renderiza sem nova busca. As páginas seguintes vêm via HTTP (`/api/trpc`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### API (tRPC)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Procedure | Tipo | Input | Erros |
+|---|---|---|---|
+| `task.list` | query | `{ limit?: 1–50 (padrão 10), cursor?: string }` → `{ items, nextCursor }` | `BAD_REQUEST` se o cursor for inválido |
+| `task.byId` | query | `{ id }` | `NOT_FOUND` |
+| `task.create` | mutation | `{ titulo, descricao? }` | `BAD_REQUEST` se o título estiver vazio |
+| `task.update` | mutation | `{ id, titulo, descricao? }` | `BAD_REQUEST`, `NOT_FOUND` |
+| `task.delete` | mutation | `{ id }` | `NOT_FOUND` |
+
+Modelo: `{ id, titulo, descricao?, dataCriacao, dataAtualizacao? }`.
+
+Exemplo de erro (título só com espaços):
+
+```bash
+curl -X POST localhost:3000/api/trpc/task.create \
+  -H 'content-type: application/json' -d '{"json":{"titulo":"  "}}'
+# → 400, message: "O título é obrigatório", data.zodError.fieldErrors.titulo
+```
+
+## Decisões
+
+- **Schema único no zod**: `taskCreateSchema` é o input do `create` e o resolver do formulário. O `trim()` antes do `min(1)` faz um título só com espaços contar como vazio, nos dois lados.
+- **Erros legíveis**: o `errorFormatter` troca a mensagem padrão do zod (um JSON) pelas mensagens dos campos e expõe `zodError` com os erros por campo. No formulário, esses erros aparecem embaixo do input e também viram um toast.
+- **Paginação por cursor** (e não por offset): o cursor é `timestamp_id` da última tarefa da página. Se alguém criar ou excluir tarefas durante a rolagem, a próxima página continua do ponto certo, sem pular nem repetir itens.
+- **Store no `globalThis`**: em dev, o HMR recarrega os módulos. Com o `Map` pendurado no global, as tarefas não somem a cada save.
+- **Fuso fixo na formatação de datas** (`America/Sao_Paulo`): o card é renderizado no servidor (UTC) e hidratado no navegador. Com o mesmo fuso nos dois lados, não há erro de hidratação.
+- **Invalidação após mutations**: depois de criar, editar ou excluir, a query `task.list` é invalidada. Na exclusão, o dialog só fecha depois que a lista foi recarregada, para o card não "piscar".
+
+## Limitação: dados em memória na Vercel
+
+Como o enunciado pede, não há banco de dados. Em ambiente serverless, isso significa que **a memória é por instância**:
+
+- os dados **voltam ao seed** após um tempo ocioso (cold start) ou a cada novo deploy;
+- com tráfego simultâneo, duas instâncias podem mostrar listas diferentes.
+
+Com o Fluid Compute (padrão da Vercel), as instâncias são reaproveitadas e o demo funciona bem na prática. Para persistir de verdade, bastaria trocar `src/server/db.ts` por Redis/Postgres mantendo as mesmas funções: o router não muda.
+
+## Segurança do npm
+
+O `.npmrc` tem `ignore-scripts=true`, então scripts `preinstall`/`postinstall` de dependências não rodam no `npm install` (proteção contra pacotes maliciosos). O efeito colateral é que o `prepare` (que ativa os hooks do husky) também não roda sozinho, por isso o `npm run prepare` no passo a passo. `dev` e `build` funcionam normalmente.
+
+## Commits
+
+Conventional Commits, validados por **commitlint** no hook `commit-msg`. O hook `pre-commit` roda o ESLint nos arquivos staged (**lint-staged**).
