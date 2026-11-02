@@ -1,0 +1,18 @@
+# Blueprint do Render: https://render.com/docs/blueprint-spec
+#
+# Por que Render e não Vercel: as tarefas ficam em memória, então o app precisa
+# rodar em UM processo Node sempre ligado. Em serverless (Vercel, Lambda) a
+# página e a API rodam em funções separadas, cada uma com a sua memória.
+services:
+  - type: web
+    name: nextjs-to-do
+    runtime: node
+    plan: free
+    # Região do Render mais próxima do Brasil.
+    region: virginia
+    # --include=dev: o build precisa de TypeScript, Tailwind etc. (devDependencies).
+    # A versão do Node vem do .nvmrc / engines (24).
+    buildCommand: npm ci --include=dev && npm run build
+    # `next start` escuta na porta da variável PORT, que o Render define.
+    startCommand: npm start
+    healthCheckPath: /
