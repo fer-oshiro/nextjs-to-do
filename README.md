@@ -14,15 +14,16 @@ Aplicação simples de gerenciamento de tarefas. O backend guarda as tarefas **e
 
 ## Como rodar
 
-Requisitos: Node.js 20+.
+Requisitos: Node.js 24 (versão fixada no `.nvmrc`).
 
 ```bash
+nvm use           # ou: instale o Node 24 manualmente
 npm install
 npm run prepare   # ativa os git hooks (ver "Segurança do npm" abaixo)
 npm run dev       # http://localhost:3000
 ```
 
-Outros scripts: `npm run build`, `npm start`, `npm run lint`.
+Outros scripts: `npm run build`, `npm start`, `npm run lint`, `npm run format` (Prettier).
 
 Não há variáveis de ambiente nem segredos. Ao iniciar, o servidor cria ~25 tarefas fictícias.
 
@@ -112,4 +113,11 @@ O `.npmrc` tem `ignore-scripts=true`, então scripts `preinstall`/`postinstall` 
 
 ## Commits
 
-Conventional Commits, validados por **commitlint** no hook `commit-msg`. O hook `pre-commit` roda o ESLint nos arquivos staged (**lint-staged**).
+Conventional Commits, validados por **commitlint** no hook `commit-msg`. O hook `pre-commit` roda ESLint e Prettier nos arquivos staged (**lint-staged**).
+
+## Padronização do ambiente
+
+- `.nvmrc` e `engines` no `package.json`: Node 24 local e na Vercel.
+- `.editorconfig`: indentação, fim de linha e encoding iguais em qualquer editor.
+- **Prettier** (com `prettier-plugin-tailwindcss`, que ordena as classes) para formatação e **ESLint** para qualidade; o `eslint-config-prettier` evita conflito entre os dois.
+- `.vscode/`: extensões recomendadas e formatação ao salvar.
