@@ -2,7 +2,7 @@
 
 Aplicação simples de gerenciamento de tarefas. O backend guarda as tarefas **em memória** e as expõe via **tRPC**. O frontend lista as tarefas com **SSR** e **infinite scroll**, e permite criar, editar e excluir com validação e feedback visual.
 
-**Demo:** _em breve_ (hospedado no Render; ver [Deploy](#deploy))
+**Demo:** https://nextjs-to-do.onrender.com (plano grátis do Render: o primeiro acesso após um tempo parado pode levar ~1 min; ver [Deploy](#deploy))
 
 ## Funcionalidades
 
