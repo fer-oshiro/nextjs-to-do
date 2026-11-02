@@ -1,5 +1,9 @@
+import { PencilIcon } from "lucide-react";
+import Link from "next/link";
+
 import { DeleteTaskButton } from "@/components/delete-task-button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
@@ -15,6 +19,11 @@ export function TaskCard({ task }: { task: Task }) {
           {task.dataAtualizacao && <Badge variant="secondary">Editada</Badge>}
         </CardDescription>
         <CardAction className="flex gap-1">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href={`/tasks/${task.id}/edit`} aria-label={`Editar tarefa ${task.titulo}`}>
+              <PencilIcon />
+            </Link>
+          </Button>
           <DeleteTaskButton task={task} />
         </CardAction>
       </CardHeader>

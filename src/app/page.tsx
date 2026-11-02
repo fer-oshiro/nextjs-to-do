@@ -1,4 +1,8 @@
+import { PlusIcon } from "lucide-react";
+import Link from "next/link";
+
 import { TaskList } from "@/components/task-list";
+import { Button } from "@/components/ui/button";
 import { taskListInput } from "@/lib/schemas/task";
 import { getQueryClient, HydrateClient, trpc } from "@/trpc/server";
 
@@ -24,6 +28,12 @@ export default async function HomePage() {
           <h1 className="text-2xl font-semibold">Tarefas</h1>
           <p className="text-muted-foreground text-sm">Suas tarefas, das mais recentes para as mais antigas.</p>
         </div>
+        <Button asChild>
+          <Link href="/tasks/new">
+            <PlusIcon />
+            Nova tarefa
+          </Link>
+        </Button>
       </header>
       <HydrateClient>
         <TaskList />

@@ -1,9 +1,11 @@
 "use client";
 
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import Link from "next/link";
 
 import { TaskCard } from "@/components/task-card";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { taskListInput } from "@/lib/schemas/task";
 import { useTRPC } from "@/trpc/client";
 
@@ -26,6 +28,11 @@ export function TaskList() {
           <CardTitle>Nenhuma tarefa ainda</CardTitle>
           <CardDescription>Crie a primeira para começar.</CardDescription>
         </CardHeader>
+        <CardFooter className="justify-center">
+          <Button asChild>
+            <Link href="/tasks/new">Nova tarefa</Link>
+          </Button>
+        </CardFooter>
       </Card>
     );
   }
