@@ -13,7 +13,14 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { type Task, type TaskCreateInput, taskCreateSchema } from "@/lib/schemas/task";
+import {
+  DESCRICAO_MAX,
+  type Task,
+  type TaskCreateInput,
+  taskCreateSchema,
+  TITULO_MAX,
+} from "@/lib/schemas/task";
+import { cn } from "@/lib/utils";
 import type { AppRouter } from "@/server/routers/_app";
 import { useTRPC } from "@/trpc/client";
 
@@ -82,7 +89,10 @@ export function TaskForm({ task }: Props) {
                 autoFocus
                 disabled={isPending}
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              <div className="flex items-baseline justify-between gap-4">
+                {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : <span />}
+                <CharCount length={field.value.length} max={TITULO_MAX} />
+              </div>
             </Field>
           )}
         />
@@ -100,8 +110,14 @@ export function TaskForm({ task }: Props) {
                 aria-invalid={fieldState.invalid}
                 disabled={isPending}
               />
-              <FieldDescription>Opcional.</FieldDescription>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              <div className="flex items-baseline justify-between gap-4">
+                {fieldState.invalid ? (
+                  <FieldError errors={[fieldState.error]} />
+                ) : (
+                  <FieldDescription>Opcional.</FieldDescription>
+                )}
+                <CharCount length={field.value?.length ?? 0} max={DESCRICAO_MAX} />
+              </div>
             </Field>
           )}
         />
@@ -116,5 +132,19 @@ export function TaskForm({ task }: Props) {
         </Field>
       </FieldGroup>
     </form>
+  );
+}
+
+/** Contador "34/120": avisa do limite antes do envio; fica vermelho se passar. */
+function CharCount({ length, max }: { length: number; max: number }) {
+  return (
+    <span
+      className={cn(
+        "shrink-0 text-xs text-muted-foreground tabular-nums",
+        length > max && "text-destructive",
+      )}
+    >
+      {length}/{max}
+    </span>
   );
 }

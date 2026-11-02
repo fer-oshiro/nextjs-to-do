@@ -5,17 +5,21 @@ import { z } from "zod";
  * frontend (zodResolver do formulário). Assim a regra "título obrigatório"
  * existe em um único lugar e as duas pontas nunca divergem.
  */
+/** Limites exportados para o formulário mostrar o contador ("34/120"). */
+export const TITULO_MAX = 120;
+export const DESCRICAO_MAX = 1000;
+
 export const taskCreateSchema = z.object({
   // trim() antes do min(1): um título só com espaços também é inválido.
   titulo: z
     .string()
     .trim()
     .min(1, "O título é obrigatório")
-    .max(120, "O título deve ter no máximo 120 caracteres"),
+    .max(TITULO_MAX, `O título deve ter no máximo ${TITULO_MAX} caracteres`),
   descricao: z
     .string()
     .trim()
-    .max(1000, "A descrição deve ter no máximo 1000 caracteres")
+    .max(DESCRICAO_MAX, `A descrição deve ter no máximo ${DESCRICAO_MAX} caracteres`)
     .optional(),
 });
 
