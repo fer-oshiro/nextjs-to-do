@@ -2,7 +2,7 @@
 
 Aplicação simples de gerenciamento de tarefas. O backend guarda as tarefas **em memória** e as expõe via **tRPC**. O frontend lista as tarefas com **SSR** e **infinite scroll**, e permite criar, editar e excluir com validação e feedback visual.
 
-**Demo:** _em breve_
+**Demo:** https://nextjs-to-do-livid.vercel.app (dados em memória: podem voltar ao estado inicial, ver [limitação](#limitação-dados-em-memória-na-vercel))
 
 ## Funcionalidades
 
