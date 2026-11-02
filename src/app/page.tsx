@@ -26,7 +26,9 @@ export default async function HomePage() {
       <header className="mb-6 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Tarefas</h1>
-          <p className="text-muted-foreground text-sm">Suas tarefas, das mais recentes para as mais antigas.</p>
+          <p className="text-sm text-muted-foreground">
+            Suas tarefas, das mais recentes para as mais antigas.
+          </p>
         </div>
         <Button asChild>
           <Link href="/tasks/new">

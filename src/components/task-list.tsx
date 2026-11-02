@@ -74,7 +74,9 @@ export function TaskList() {
         <div ref={sentinelRef} aria-hidden className="h-px" />
       ) : (
         data.pages.length > 1 && (
-          <p className="text-muted-foreground py-4 text-center text-sm">Você chegou ao fim da lista.</p>
+          <p className="py-4 text-center text-sm text-muted-foreground">
+            Você chegou ao fim da lista.
+          </p>
         )
       )}
     </div>

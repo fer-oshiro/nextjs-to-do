@@ -20,7 +20,10 @@ export const taskRouter = createTRPCRouter({
     .input(
       z.object({
         limit: z.number().int().min(1).max(50).default(10),
-        cursor: z.string().regex(/^\d+_.+$/, "Cursor inválido").nullish(),
+        cursor: z
+          .string()
+          .regex(/^\d+_.+$/, "Cursor inválido")
+          .nullish(),
       }),
     )
     .query(({ input }) => listTasks(input)),

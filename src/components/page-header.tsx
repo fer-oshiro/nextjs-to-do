@@ -14,7 +14,7 @@ export function PageHeader({ title, description }: { title: string; description?
       </Button>
       <div>
         <h1 className="text-2xl font-semibold">{title}</h1>
-        {description && <p className="text-muted-foreground text-sm">{description}</p>}
+        {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </div>
     </header>
   );

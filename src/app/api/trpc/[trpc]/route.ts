@@ -11,7 +11,8 @@ const handler = (req: Request) =>
     createContext: createTRPCContext,
     onError:
       process.env.NODE_ENV === "development"
-        ? ({ path, error }) => console.error(`❌ tRPC falhou em ${path ?? "<sem path>"}: ${error.message}`)
+        ? ({ path, error }) =>
+            console.error(`❌ tRPC falhou em ${path ?? "<sem path>"}: ${error.message}`)
         : undefined,
   });
 

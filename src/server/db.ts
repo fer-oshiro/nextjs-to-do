@@ -87,7 +87,10 @@ export function deleteTask(id: string) {
 /** Tarefas fictícias para a lista nunca começar vazia (e o scroll ter o que paginar). */
 function seed() {
   const exemplos: Array<[string, string?]> = [
-    ["Revisar pull request do módulo de relatórios", "Conferir testes e nomes de variáveis antes de aprovar."],
+    [
+      "Revisar pull request do módulo de relatórios",
+      "Conferir testes e nomes de variáveis antes de aprovar.",
+    ],
     ["Atualizar dependências do projeto"],
     ["Escrever documentação da API", "Endpoints de tarefas: criar, listar, editar e excluir."],
     ["Preparar apresentação da sprint"],

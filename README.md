@@ -28,16 +28,16 @@ Não há variáveis de ambiente nem segredos. Ao iniciar, o servidor cria ~25 ta
 
 ## Stack
 
-| Necessidade | Escolha | Por quê |
-|---|---|---|
-| Framework | Next.js 15 (App Router) | Server Components para o SSR; route handler para a API |
-| API | tRPC v11 | Tipagem ponta a ponta sem gerar código nem escrever contratos |
+| Necessidade                | Escolha                                           | Por quê                                                       |
+| -------------------------- | ------------------------------------------------- | ------------------------------------------------------------- |
+| Framework                  | Next.js 15 (App Router)                           | Server Components para o SSR; route handler para a API        |
+| API                        | tRPC v11                                          | Tipagem ponta a ponta sem gerar código nem escrever contratos |
 | Cache / estado do servidor | TanStack Query (via `@trpc/tanstack-react-query`) | Hidratação do SSR, infinite query, invalidação após mutations |
-| Validação | zod | O **mesmo schema** valida o input do tRPC e o formulário |
-| Serialização | superjson | `dataCriacao` chega no cliente como `Date`, não como string |
-| Formulário | react-hook-form + `@hookform/resolvers/zod` | Estado do form com hooks e validação pelo schema |
-| UI | shadcn/ui + Tailwind CSS | Componentes acessíveis prontos (dialog, toast, skeleton…) |
-| Infinite scroll | `react-intersection-observer` | Detecta quando o fim da lista entra na tela |
+| Validação                  | zod                                               | O **mesmo schema** valida o input do tRPC e o formulário      |
+| Serialização               | superjson                                         | `dataCriacao` chega no cliente como `Date`, não como string   |
+| Formulário                 | react-hook-form + `@hookform/resolvers/zod`       | Estado do form com hooks e validação pelo schema              |
+| UI                         | shadcn/ui + Tailwind CSS                          | Componentes acessíveis prontos (dialog, toast, skeleton…)     |
+| Infinite scroll            | `react-intersection-observer`                     | Detecta quando o fim da lista entra na tela                   |
 
 ## Arquitetura
 
@@ -70,13 +70,13 @@ src/
 
 ### API (tRPC)
 
-| Procedure | Tipo | Input | Erros |
-|---|---|---|---|
-| `task.list` | query | `{ limit?: 1–50 (padrão 10), cursor?: string }` → `{ items, nextCursor }` | `BAD_REQUEST` se o cursor for inválido |
-| `task.byId` | query | `{ id }` | `NOT_FOUND` |
-| `task.create` | mutation | `{ titulo, descricao? }` | `BAD_REQUEST` se o título estiver vazio |
-| `task.update` | mutation | `{ id, titulo, descricao? }` | `BAD_REQUEST`, `NOT_FOUND` |
-| `task.delete` | mutation | `{ id }` | `NOT_FOUND` |
+| Procedure     | Tipo     | Input                                                                     | Erros                                   |
+| ------------- | -------- | ------------------------------------------------------------------------- | --------------------------------------- |
+| `task.list`   | query    | `{ limit?: 1–50 (padrão 10), cursor?: string }` → `{ items, nextCursor }` | `BAD_REQUEST` se o cursor for inválido  |
+| `task.byId`   | query    | `{ id }`                                                                  | `NOT_FOUND`                             |
+| `task.create` | mutation | `{ titulo, descricao? }`                                                  | `BAD_REQUEST` se o título estiver vazio |
+| `task.update` | mutation | `{ id, titulo, descricao? }`                                              | `BAD_REQUEST`, `NOT_FOUND`              |
+| `task.delete` | mutation | `{ id }`                                                                  | `NOT_FOUND`                             |
 
 Modelo: `{ id, titulo, descricao?, dataCriacao, dataAtualizacao? }`.
 

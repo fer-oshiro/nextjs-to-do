@@ -7,7 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 
-export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function ErrorPage({
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -24,7 +29,9 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
     <Card>
       <CardHeader>
         <CardTitle>Algo deu errado</CardTitle>
-        <CardDescription>Não foi possível carregar esta página. Tente novamente em instantes.</CardDescription>
+        <CardDescription>
+          Não foi possível carregar esta página. Tente novamente em instantes.
+        </CardDescription>
       </CardHeader>
       <CardFooter>
         <Button onClick={retry} disabled={isPending}>
