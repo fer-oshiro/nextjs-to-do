@@ -7,9 +7,10 @@ import type { Task, TaskCreateInput, TaskUpdateInput } from "@/lib/schemas/task"
  * módulos a cada alteração (HMR). Uma variável de módulo comum seria recriada
  * e as tarefas sumiriam a cada save. Pendurado no global, o Map sobrevive.
  *
- * Em produção (serverless) a memória é por instância: os dados podem resetar
- * em um cold start ou novo deploy. Ver README. Trocar este arquivo por
- * Redis/Postgres não exige mudar o router, que só conhece as funções abaixo.
+ * Por ser memória do processo, o deploy precisa ser em um único processo Node
+ * sempre ligado (Render), e não serverless, onde cada função tem a sua memória.
+ * Ver README. Trocar este arquivo por Redis/Postgres não exige mudar o router,
+ * que só conhece as funções abaixo.
  */
 const globalForDb = globalThis as unknown as { taskStore?: Map<string, Task> };
 

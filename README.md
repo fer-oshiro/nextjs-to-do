@@ -2,7 +2,7 @@
 
 Aplicação simples de gerenciamento de tarefas. O backend guarda as tarefas **em memória** e as expõe via **tRPC**. O frontend lista as tarefas com **SSR** e **infinite scroll**, e permite criar, editar e excluir com validação e feedback visual.
 
-**Demo:** https://nextjs-to-do-livid.vercel.app (dados em memória: podem voltar ao estado inicial, ver [limitação](#limitação-dados-em-memória-na-vercel))
+**Demo:** _em breve_ (hospedado no Render; ver [Deploy](#deploy))
 
 ## Funcionalidades
 
@@ -98,14 +98,20 @@ curl -X POST localhost:3000/api/trpc/task.create \
 - **Fuso fixo na formatação de datas** (`America/Sao_Paulo`): o card é renderizado no servidor (UTC) e hidratado no navegador. Com o mesmo fuso nos dois lados, não há erro de hidratação.
 - **Invalidação após mutations**: depois de criar, editar ou excluir, a query `task.list` é invalidada. Na exclusão, o dialog só fecha depois que a lista foi recarregada, para o card não "piscar".
 
-## Limitação: dados em memória na Vercel
+## Deploy
 
-Como o enunciado pede, não há banco de dados. Em ambiente serverless, isso significa que **a memória é por instância**:
+O app roda no **Render**, configurado pelo [`render.yaml`](render.yaml): um único processo Node (`next start`) sempre ligado. Para publicar, basta ir em **New → Blueprint** no Render e apontar para este repositório. Não há variáveis de ambiente.
 
-- os dados **voltam ao seed** após um tempo ocioso (cold start) ou a cada novo deploy;
-- com tráfego simultâneo, duas instâncias podem mostrar listas diferentes.
+### Por que não serverless (Vercel, AWS Lambda)?
 
-Com o Fluid Compute (padrão da Vercel), as instâncias são reaproveitadas e o demo funciona bem na prática. Para persistir de verdade, bastaria trocar `src/server/db.ts` por Redis/Postgres mantendo as mesmas funções: o router não muda.
+Como o enunciado pede, as tarefas ficam **em memória**, sem banco. Isso exige que todas as requisições caiam no **mesmo processo**. No serverless isso não acontece: na Vercel, a página (SSR) e a API (`/api/trpc`) rodam em funções separadas, cada uma com a sua memória e o seu seed. O resultado era que tarefas vindas do SSR não eram encontradas ao editar ou excluir pela API.
+
+### Limitações do demo
+
+- No plano grátis, o Render desliga o serviço após ~15 min sem acessos. O primeiro acesso depois disso leva cerca de 1 minuto, e os dados **voltam ao seed**.
+- Cada novo deploy também volta os dados ao seed.
+
+Para persistir de verdade (e poder usar serverless), bastaria trocar `src/server/db.ts` por Redis/Postgres mantendo as mesmas funções: o router não muda.
 
 ## Segurança do npm
 
@@ -117,7 +123,7 @@ Conventional Commits, validados por **commitlint** no hook `commit-msg`. O hook 
 
 ## Padronização do ambiente
 
-- `.nvmrc` e `engines` no `package.json`: Node 24 local e na Vercel.
+- `.nvmrc` e `engines` no `package.json`: Node 24 local e no Render.
 - `.editorconfig`: indentação, fim de linha e encoding iguais em qualquer editor.
 - **Prettier** (com `prettier-plugin-tailwindcss`, que ordena as classes) para formatação e **ESLint** para qualidade; o `eslint-config-prettier` evita conflito entre os dois.
 - `.vscode/`: extensões recomendadas e formatação ao salvar.
