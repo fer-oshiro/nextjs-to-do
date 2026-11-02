@@ -1,5 +1,6 @@
+import { DeleteTaskButton } from "@/components/delete-task-button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
 import type { Task } from "@/lib/schemas/task";
@@ -13,6 +14,9 @@ export function TaskCard({ task }: { task: Task }) {
           <time dateTime={task.dataCriacao.toISOString()}>Criada em {formatDate(task.dataCriacao)}</time>
           {task.dataAtualizacao && <Badge variant="secondary">Editada</Badge>}
         </CardDescription>
+        <CardAction className="flex gap-1">
+          <DeleteTaskButton task={task} />
+        </CardAction>
       </CardHeader>
       {task.descricao && (
         <CardContent>
